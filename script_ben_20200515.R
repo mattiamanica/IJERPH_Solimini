@@ -493,6 +493,27 @@ table3
 write.table(table3,here("output","table3.csv"),sep="|",row.names =F,quote=F)
 
 
+########### pvalue asked by reviewer
+dependent.variables <- c("k_bitetime_bin", "k_disease_bin","a_diseaseworry_bin",
+                         "a_bite_nuisance_bin","a_mosq_nuisance_bin","p_action_bin")
+
+m1 <- lapply(dependent.variables, function(dvar) 
+  as.data.frame(anova(glm(eval(paste0(dvar,' ~ etnic_group+sex+age+edu_level')), data = db,family=binomial),test="Chisq"))[2,])
+
+dbpval <- data.frame()
+for(i in 1:6){
+  line <- bind_cols(data.frame(Resp = dependent.variables[i]),m1[[i]])
+  dbpval <- bind_rows(dbpval,line)
+}
+dbpval
+
+
+
+
+
+
+
+
 
 #####predictors of nuisance
 library(sjPlot)
