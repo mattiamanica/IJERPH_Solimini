@@ -498,19 +498,21 @@ dependent.variables <- c("k_bitetime_bin", "k_disease_bin","a_diseaseworry_bin",
                          "a_bite_nuisance_bin","a_mosq_nuisance_bin","p_action_bin")
 
 m1 <- lapply(dependent.variables, function(dvar) 
-  as.data.frame(anova(glm(eval(paste0(dvar,' ~ etnic_group+sex+age+edu_level')), data = db,family=binomial),test="Chisq"))[2,])
+  as.data.frame(anova(glm(eval(paste0(dvar,' ~ sex+age+edu_level')), data = db,family=binomial),
+                      glm(eval(paste0(dvar,' ~ etnic_group+sex+age+edu_level')), data = db,family=binomial),test="Chisq"))[2,])
 
 dbpval <- data.frame()
 for(i in 1:6){
   line <- bind_cols(data.frame(Resp = dependent.variables[i]),m1[[i]])
   dbpval <- bind_rows(dbpval,line)
 }
+dbpval$pval <- round(dbpval$`Pr(>Chi)`,5)
+
 dbpval
 
-
-
-
-
+summary(glm(a_mosq_nuisance_bin ~ etnic_group+sex+age+edu_level, data = db,family=binomial))
+anova(glm(where ~ sesso_F+eta+livelloeducativo, data=Qife.cicle, family=binomial),
+      glm(where ~ paese_etnia2+sesso_F+eta+livelloeducativo, data = Qife.cicle,family=binomial),test="Chisq")
 
 
 
