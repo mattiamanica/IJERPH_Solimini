@@ -7,8 +7,8 @@ library(tidyverse)
 
 #script Q ben
 
-dati_Q_Ben <- read.csv(here("data","dati_Q_Ben2.csv"), na.strings="",sep=";")
-Q_completo_life.cicle.anni.italia <- read.csv(here("data","Q_completo_life cicle anni italia.csv"), sep=";")
+dati_Q_Ben <- read.csv(here("data","dati_Q_Ben2.csv"), na.strings="",sep=";",stringsAsFactors = TRUE)
+Q_completo_life.cicle.anni.italia <- read.csv(here("data","Q_completo_life cicle anni italia.csv"), sep=";",stringsAsFactors = TRUE)
 
 
 ##house keeping
@@ -92,10 +92,7 @@ db <- db %>%
   filter(!is.na(eta),!eta<18,!is.na(paese_etnia2) )%>%
   rename(etnic_group=`paese_etnia2`,age=`eta`, sex=sesso_F, edu_level=`livelloeducativo2`, house_type=`abitazione_tipo`, house_floor=`piano2`, house_out_space=`area_esterna`, green_area=`areaverde_vicina2`,
                     house_window_screen=`zanzariere_si`, k_lifecycle=`conosce_ciclo`, k_bitetime=`ora_punture`, 
-                    k_disease=`conosce_malattie`, a_diseaseworry=`preoccupazione_malattie`, a_bite_nuisance=`punture_disturbo`, a_mosq_nuisance=`zanzare_disturbo`, p_action=`azioni_evitare`) %>% 
-  select(cod,tipo_Q,etnic_group,age, sex, edu_level, house_type, house_floor, house_out_space, green_area,
-         house_window_screen, k_lifecycle, k_bitetime, 
-         k_disease, a_diseaseworry, a_bite_nuisance, a_mosq_nuisance, p_action)
+                    k_disease=`conosce_malattie`, a_diseaseworry=`preoccupazione_malattie`, a_bite_nuisance=`punture_disturbo`, a_mosq_nuisance=`zanzare_disturbo`, p_action=`azioni_evitare`) 
 
 
 ###descrittive
@@ -116,7 +113,7 @@ table1<-data.frame(table1[,1:5])
 db %>% 
   select(etnic_group,sex, edu_level, house_type, house_floor, house_out_space, green_area,
          house_window_screen) %>% 
-    summarise_all(funs(chisq.test(.,db$etnic_group)$p.value))
+    summarise_all(~chisq.test(.,db$etnic_group)$p.value)
 
 chisq.test(db$sex,db$etnic_group)
 chisq.test(db$edu_level,db$etnic_group)
@@ -145,7 +142,7 @@ medie<-medie %>% mutate_if(is.numeric, round, 2)
 
 table1<-rbind(table1,medie) #tabella 1
 rm(medie)
-write.table(table1,"table1.csv",sep=",",row.names =F)
+write.table(table1,here("output","table1.txt"),sep="|",row.names =F,quote=FALSE)
 
 
 table2<-db %>% 
@@ -217,7 +214,7 @@ AA <- likert(etnic_group ~ .,bitenuis2, as.percent = TRUE,
        sub = "", panel=myPanelFunc,ylab="")
 AA
 
-pdf("Kdis.pdf",width = 6,height = 4)
+pdf(here("output","Kdis.pdf"),width = 6,height = 4)
 AA
 dev.off()
 
@@ -233,7 +230,7 @@ BB <- likert(etnic_group ~ .,bitenuis, as.percent = TRUE,
        auto.key=list(between=1, between.columns=2),
        sub = "", panel=myPanelFunc,ylab="")
 BB
-pdf("Ktime.pdf",width = 6,height = 4)
+pdf(here("output","Ktime.pdf"),width = 6,height = 4)
 BB
 dev.off()
 
@@ -247,7 +244,7 @@ DD <-likert(etnic_group ~ .,bitenuis, as.percent = TRUE,
        xlim=c(-100,100),xlab="Percentage (%)",
        main = "How much do you feel disturbed by tiger mosquitoes bites?",
        sub = "", panel=myPanelFunc,ylab="")
-pdf("Abite.pdf",width = 6,height = 4)
+pdf(here("output","Abite.pdf"),width = 6,height = 4)
 DD
 dev.off()
 
@@ -261,7 +258,7 @@ CC <- likert(etnic_group ~ .,bitenuis, as.percent = TRUE,
        xlim=c(-100,100),xlab="Percentage (%)",
        main = "How often are you worried by diseases that Aedes mosquitoes may transmit?",
        sub = "", panel=myPanelFunc,ylab="")
-pdf("Adis.pdf",width = 6,height = 4)
+pdf(here("output","Adis.pdf"),width = 6,height = 4)
 CC
 dev.off()
 
@@ -276,7 +273,7 @@ EE <- likert(etnic_group ~ .,bitenuis, as.percent = TRUE,
        xlim=c(-100,100),xlab="Percentage (%)",
        main = "How often do you feel disturbed at home by tiger mosquitoes?",
        sub = "", panel=myPanelFunc,ylab="")
-pdf("Admosq.pdf",width = 6,height = 4)
+pdf(here("output","Admosq.pdf"),width = 6,height = 4)
 EE
 dev.off()
 
@@ -290,7 +287,7 @@ FF <- likert(etnic_group ~ .,bitenuis, as.percent = TRUE,
        xlim=c(-100,100),ReferenceZero=1.5,xlab="Percentage (%)",
        main = "what do you do to avoid Aedes bites?",
        sub = "", panel=myPanelFunc,ylab="")
-pdf("pact.pdf",width = 6,height = 4)
+pdf(here("output","pact.pdf"),width = 6,height = 4)
 FF
 dev.off()
 
@@ -318,10 +315,12 @@ table2b<-Q_completo_life.cicle.anni.italia %>%
             grounds  = mean(eggslarvae_ground.herbs.trees), 
             walla   = mean(eggslarvae_walls)) %>%
   gather(key = Where, value = perc,-paese_etnia2)
+table2b$paese_etnia2 
 table2b$Where <- factor(table2b$Where, 
                         levels = c("water","grounds","walla","unknown"),
                         labels  = c("Small water containers,\nstorm drains","Bare ground,\nvegetation","Walls","Don't know"))
-levels(table2b$paese_etnia2) <- c("Malayalis","Punjabis","Italian")
+
+levels(table2b$paese_etnia2 )<- c("Malayalis","Punjabis","Italian")
 
 
 aa <- Q_completo_life.cicle.anni.italia %>%
@@ -332,10 +331,9 @@ aa <- Q_completo_life.cicle.anni.italia %>%
   gather(key = Where, value = perc,-paese_etnia2)
 
 levels(aa$paese_etnia2) <- c("Malayalis","Punjabis","Italian")
-table2b <- bind_rows(table2b,aa)
 
   
-pdf("Kcycle.pdf",width = 6,height = 3)
+pdf(here("output","Figure1.pdf"),width = 6,height = 3)
 ggplot(table2b, aes(x = paese_etnia2, y = perc*100,fill=Where ))+
   ylim(c(0,100))+ylab("Percentage (%)")+xlab("")+
   geom_bar(stat="identity",width=0.75,position = position_dodge(),col="black")+
@@ -345,11 +343,10 @@ ggplot(table2b, aes(x = paese_etnia2, y = perc*100,fill=Where ))+
   scale_fill_brewer(direction = -1)+
   scale_color_manual(name = "",values="red")+
   ggtitle("Where tiger mosquitoes lay eggs and larvae develop?")
-  
 dev.off()  
 
 
-png("Kcycle.png",width = 6,height = 3,units = "in",res = 600)
+png(here("output","Figure1.png"),width = 6,height = 3,units = "in",res = 600)
 ggplot(table2b, aes(x = paese_etnia2, y = perc*100,fill=Where ))+
   ylim(c(0,100))+ylab("Percentage (%)")+xlab("")+
   geom_bar(stat="identity",width=0.75,position = position_dodge(),col="black")+
@@ -383,25 +380,6 @@ tapply(Qife.cicle$where,Qife.cicle$paese_etnia2,mean)
 
 
 
-# table2b<-Q_completo_life.cicle.anni.italia %>%
-#   gather(value,variable,eggslarvae_unknown,eggslarvae_water, eggslarvae_ground.herbs.trees, eggslarvae_walls) %>%
-#   group_by(paese_etnia2,variable,value) %>%
-#   summarise (n=n()) %>%
-#   filter(!is.na(value)) %>%
-#   mutate(freq = n / sum(n)) %>%
-#   select(-c(n))%>%
-#   spread(paese_etnia2,freq)
-
-table2b<-data.frame(table2b[table2b$variable==1,])
-table2b$variable<-"knowledge of lifecycle"
-
-table2c<-rbind(table2,table2b)
-table2c<-table2c %>% mutate_if(is.numeric, round, 2)
-
-write.table(table2c,"~/Dropbox/dati Q zanzare/table2.csv",sep=",",row.names =F)
-table2<-table2c
-rm(table2b,table2c,names)
-
 ###stat
 #univariata
 #summary(lm(eta ~ paese_etnia2, data =db))
@@ -417,6 +395,7 @@ rm(table2b,table2c,names)
 
 #library(epiDisplay)
 db$etnic_group <- relevel(db$etnic_group, ref="italia")
+Q_completo_life.cicle.anni.italia$paese_etnia2 <- factor(Q_completo_life.cicle.anni.italia$paese_etnia2)
 Q_completo_life.cicle.anni.italia$paese_etnia2 <- relevel(Q_completo_life.cicle.anni.italia$paese_etnia2, ref="italia")
 
 db <- db %>% 
@@ -481,7 +460,7 @@ cbind(beta=round(exp(coef(m1[[6]])[2:3]),2),round(exp(confint(m1[[6]])[2:3,]),2)
 )
 
 
-
+m1.b
 
 
 
@@ -510,7 +489,8 @@ table3<-table3.c
 
 rm(table3.a,table3.b, table3.c, m1,m1.b, m2, m2.b,  dependent.variables)
 
-write.table(table3,"~/Dropbox/dati Q zanzare/table3.csv",sep=",",row.names =F)
+table3
+write.table(table3,here("output","table3.csv"),sep="|",row.names =F,quote=F)
 
 
 
