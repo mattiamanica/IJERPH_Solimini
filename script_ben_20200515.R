@@ -1,7 +1,6 @@
 
 
 
-
 library(here)
 library(tidyverse)
 
@@ -342,7 +341,7 @@ ggplot(table2b, aes(x = paese_etnia2, y = perc*100,fill=Where ))+
   theme_bw() + coord_flip()+
   scale_fill_brewer(direction = -1)+
   scale_color_manual(name = "",values="red")+
-  ggtitle("Where tiger mosquitoes lay eggs and larvae develop?")
+  ggtitle("Where do tiger mosquitoes lay eggs and larvae develop??")
 dev.off()  
 
 
@@ -355,7 +354,7 @@ ggplot(table2b, aes(x = paese_etnia2, y = perc*100,fill=Where ))+
   theme_bw() + coord_flip()+
   scale_fill_brewer(direction = -1)+
   scale_color_manual(name = "",values="red")+
-ggtitle("Where tiger mosquitoes lay eggs and larvae develop?")
+ggtitle("Where do tiger mosquitoes lay eggs and larvae develop?")
 dev.off() 
 
 
@@ -527,15 +526,20 @@ theme_set(theme_sjplot())
 db$Group <- factor(db$etnic_group,levels = levels(db$etnic_group),
                    labels = c("Italians","Mayalalis","Punjabis"))
 
-set_label(db$a_mosq_nuisance_bin) <- "How much do you feel disturbed at home by tiger mosquito?"
+set_label(db$a_mosq_nuisance_bin) <- "how much do you feel disturbed at home by tiger mosquitoes?"
 m3 <- glm(a_mosq_nuisance_bin ~ Group+sex+age+edu_level+house_type+house_floor+house_out_space+green_area+house_window_screen, data = db,family=binomial)
 
 summary(m3)
 anova(m3, test="LRT")
 
-#png("NuisKAP.png",width = 7,height = 7,units = "in",res = 600)
-pdf("Figure3.pdf",width = 7,height = 7)
+png("Figure3.png",width = 7,height = 7,units = "in",res = 600)
 
+plot_model(m3,show.values = TRUE, value.offset = .3)
+
+dev.off()
+
+
+pdf("Figure3.pdf",width = 7,height = 7)
 plot_model(m3,show.values = TRUE, value.offset = .3)
 
 dev.off()
